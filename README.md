@@ -1,6 +1,8 @@
 # DraftShelf: native-first source-tree export
 
-**Feasibility prototype. Native hosted acceptance is pending. No product UI has been built.**
+**Native feasibility passed for novelWriter 26.2.1 / project format 1.6 revision 0. This is a Python source prototype; no product UI has been built.**
+
+[Verified native run](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37456245967) · [Evidence and limits](docs/VERIFICATION.md)
 
 DraftShelf reads a closed, unpacked novelWriter **project format 1.6 revision 0** and creates an ordered, readable ZIP of its original document bodies. Each source document becomes exactly one `.md` file. Nested folders, document children, inactive notes, duplicate labels and Unicode remain represented. It does not rebuild the project from headings or render novelWriter's extended markup as standard Markdown.
 
@@ -34,7 +36,7 @@ The hosted workflow verifies the official novelWriter 26.2.1 wheel and the nativ
 
 An independent handwritten oracle checks the complete tree and all six bodies against exact output paths. The exporter runs only after the native GUI closes the project; every original project file is hashed before and after export. Missing-document, heading-split and body-rewrite negative controls must fail the same exact-output assertions. See [the complete acceptance contract](docs/TEST-DESIGN.md).
 
-Local source tests are not proof of native interoperability. Product UI work is gated on a successful exact-commit hosted native run and independent evidence review.
+The complete native gate passed at `a8b3584760daf9d87263a9ccc6e57a073b67a4d4`, with the downloaded evidence independently checked. A future browser producer must pass again using its own actual downloaded files; this Python result is not a substitute for that test.
 
 ## Input limits and distribution
 
