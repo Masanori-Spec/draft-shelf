@@ -1,6 +1,6 @@
 # Offline browser acceptance
 
-The independent Python feasibility proof remains in VERIFICATION.md. It does not establish the browser implementation's correctness. Product acceptance requires a fresh exact-commit hosted run and independent inspection of its actual downloaded files and native evidence.
+The independent Python feasibility proof remains in VERIFICATION.md. The separate actual-browser gate passed at `d33ba649e6f3949674d887d5305084809470f82e`; see [the browser verification record](UI-VERIFICATION.md). The requirements below continue to apply to each changed browser producer.
 
 ## User selection and fidelity
 

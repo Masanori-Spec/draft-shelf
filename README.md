@@ -1,8 +1,8 @@
-# DraftShelf: native-first source-tree export
+# DraftShelf: keep each source document intact
 
-**Offline browser UI candidate for novelWriter 26.2.1 / project format 1.6 revision 0. The separate Python native feasibility gate passed. Actual browser/native acceptance is still pending.**
+**Offline Japanese/English source-tree copy for novelWriter 26.2.1 / project format 1.6 revision 0. Actual packaged-browser downloads passed the fresh native application and independent byte/tree checks.**
 
-[Verified native run](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37456245967) · [Evidence and limits](docs/VERIFICATION.md)
+[Verified browser/native run](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37538622578) · [Browser evidence and limits](docs/UI-VERIFICATION.md) · [Earlier Python proof](docs/VERIFICATION.md)
 
 DraftShelf reads a closed, unpacked novelWriter **project format 1.6 revision 0** and creates an ordered, readable ZIP of its original document bodies. Each source document becomes exactly one `.md` file. Nested folders, document children, inactive notes, duplicate labels and Unicode remain represented. It does not rebuild the project from headings or render novelWriter's extended markup as standard Markdown.
 
@@ -42,9 +42,9 @@ Bodies retain the exact UTF-8 source bytes after the native TOML header, includi
 
 The hosted workflow verifies the official novelWriter 26.2.1 wheel and the native class files against the pinned source commit. Its fixture is **API-authored**, using unchanged `NWProject` and `ProjectDocument`, with a real `GuiMain`. The actual GUI's native open/save/close/reopen handlers consume those same files. Screenshots and native enumeration are retained. No parser patch, fake GUI, private validity flag or hand-written native XML replaces the real application.
 
-An independent handwritten oracle checks the complete tree and all six bodies against exact output paths. The exporter runs only after the native GUI closes the project; every original project file is hashed before and after export. Missing-document, heading-split and body-rewrite negative controls must fail the same exact-output assertions. See [the complete acceptance contract](docs/TEST-DESIGN.md).
+An independent handwritten oracle checks the complete tree and all eight bodies against exact output paths. The exporter runs only after the native GUI closes the project; every original project file is hashed before and after export. Missing-document, heading-split and body-rewrite negative controls must fail the same exact-output assertions. See [the complete acceptance contract](docs/TEST-DESIGN.md).
 
-The complete native gate passed at `a8b3584760daf9d87263a9ccc6e57a073b67a4d4`, with the downloaded evidence independently checked. The browser producer must pass again using its own actual downloaded files; this Python result is not a substitute for that test.
+The actual offline browser producer passed at `d33ba649e6f3949674d887d5305084809470f82e`. Both its eight-body ZIP and explicit five-body selection were checked against fresh native input files and literal expectations. The earlier six-body Python proof remains recorded separately.
 
 ## Input limits and distribution
 
@@ -52,6 +52,6 @@ Limits: 2 MiB XML, 4 MiB per document, 32 MiB combined input, 2048 tree items, 1
 
 Source only. No novelWriter/Qt binaries, vendor implementation, real writing projects or original-code license grant is distributed. The official application and dependencies are fetched from official package registries only within hosted CI. No fees, hosting service or account is needed to use the exporter.
 
-## Browser candidate checks
+## Browser verification
 
-The JavaScript reader is an independent implementation. Current local tests include 30 direct comparisons with the Python reader for labels, exact source bodies and metadata, plus malformed/bounded input cases. The hosted gate must open the exact packaged offline ZIP, obtain real browser downloads (all eight native fixture bodies and a five-body explicit selection), and compare those files with fresh official native enumeration and a separate literal oracle. Browser runtime and screenshot/print acceptance remain pending. The preserved Python proof in VERIFICATION.md is unchanged.
+The JavaScript reader is an independent implementation. The successful hosted run passed 61 JavaScript tests and 28 Python tests, including 30 direct implementation comparisons, plus 23 browser scenarios. It opened the exact shipped offline ZIP, captured real full/selected downloads, and checked them against fresh official native enumeration, the Python reader and a separate handwritten oracle. Japanese/English desktop and 390px screenshots, keyboard/race/bounds checks, and a two-page print review are retained. Both browser launches kept the sandbox enabled; the offline app made no HTTP requests and reported no console/page errors. See [the exact evidence and limits](docs/UI-VERIFICATION.md).

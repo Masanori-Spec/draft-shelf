@@ -50,3 +50,7 @@ The exported `.md` files contain novelWriter source syntax verbatim. Standard-Ma
 ## Verified prototype outcome
 
 The full Python native gate passed in [run 37456245967](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37456245967) at commit `a8b3584760daf9d87263a9ccc6e57a073b67a4d4`. See [the verification record](VERIFICATION.md) for the exact downloaded artifact, actual output and scope. A later browser producer must pass with its own real downloads; this prototype result does not pre-approve a different implementation.
+
+## Verified browser outcome
+
+The fresh eight-body browser gate passed in [run 37538622578](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37538622578) at `d33ba649e6f3949674d887d5305084809470f82e`. Its actual full/selected browser ZIPs, native GUI-handler evidence, literal/Python comparisons, source immutability, screenshots and print output are recorded in [UI-VERIFICATION.md](UI-VERIFICATION.md). This is a separate producer proof; the historical Python record remains unchanged.
