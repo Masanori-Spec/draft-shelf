@@ -4,14 +4,16 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import time
 import traceback
 
-from PyQt6.QtCore import QThreadPool
-from PyQt6.QtWidgets import QApplication, QTreeView
+import enchant
+from PyQt6.QtCore import QThreadPool, QTimer
+from PyQt6.QtWidgets import QApplication, QLabel, QTreeView
 from novelwriter import CONFIG, SHARED, __version__
 from novelwriter.core.document import ProjectDocument
 from novelwriter.core.project import NWProject
@@ -44,13 +46,39 @@ for name, expected in PINS.items():
     verified[name] = {"gitBlobSha1": actual, "path": str(module.__file__)}
 (E / "official-class-integrity.json").write_text(json.dumps(verified, indent=2) + "\n")
 
+def stage(name):
+    print("NATIVE_STAGE: " + name, flush=True)
+    (E / "native-stage.json").write_text(json.dumps({"stage":name}) + "\n")
+
+
+def timed_out():
+    # A real modal runs its own Qt event loop, so this captures its actual
+    # pixels without suppressing it or replacing its return value.
+    if screen := app.primaryScreen():
+        screen.grabWindow(0).save(str(E / "FAILED-native-timeout.png"))
+    windows = [{"title":w.windowTitle(), "class":type(w).__name__,
+                "labels":[x.text() for x in w.findChildren(QLabel)]}
+               for w in app.topLevelWidgets() if w.isVisible()]
+    (E / "FAILED-native-windows.json").write_text(json.dumps(windows, ensure_ascii=False, indent=2)+"\n")
+    print("Native gate exceeded its 90-second deadline", flush=True)
+    os._exit(124)
+
+
+stage("initialize official GUI")
+assert enchant.dict_exists("en_GB"), "Official distro English dictionary is required"
+
 app = QApplication(["novelWriter native feasibility"])
 app.setStyle("Fusion")
+watchdog = QTimer()
+watchdog.setSingleShot(True)
+watchdog.timeout.connect(timed_out)
+watchdog.start(90000)
 CONFIG.initConfig(E / "profile", E / "profile")
 CONFIG.loadConfig()
 CONFIG.initLocalisation(app)
 CONFIG.backupOnClose = False
 CONFIG.guiLocale = "en_GB"
+CONFIG.spellLanguage = "en_GB"
 SHARED.initTheme(GuiTheme())
 gui = GuiMain()
 gui.resize(1360, 950)
@@ -96,13 +124,18 @@ def enumerate_native(project):
 try:
     # Author through the official project API, with an actual GUI/theme in
     # place. No XML/header fixture writer and no private validity flags.
+    stage("author native fixture through official APIs")
     project = NWProject()
     assert project.storage.createNewProject(SOURCE) == ProjectStorageCreate.READY
+    # Give the native fixture its own project identity before emitting tree
+    # signals; an empty identity would also match the GUI's unopened project.
+    project.data.setUuid("e813ac77-9420-4cde-b316-27182a46431a")
     project.setDefaultStatusImport()
     project.data.setName("DraftShelf Native Fixture")
     project.data.setAuthor("Synthetic test fixture")
     project.data.setDoBackup(False)
     project.data.setSpellCheck(False)
+    project.data.setSpellLang("en_GB")
     roles = {}
     # Create roots out of final order, then use the native insertion position.
     roles["notes"] = project.newRoot(nwItemClass.CHARACTER)
@@ -137,6 +170,7 @@ try:
 
     # Real, unchanged application handlers perform open, save, close/reopen.
     # These calls are native API/Qt integration automation, not human clicks.
+    stage("open API-authored fixture in real GUI")
     assert gui.openProject(SOURCE / "nwProject.nwx")
     pump()
     screen("01-native-project-open")
@@ -145,10 +179,12 @@ try:
     for role in ("two_headings", "inactive_note", "child_doc", "unicode_note"):
         assert gui.openDocument(roles[role])
         screen("02-native-document-" + role)
+    stage("save and close native GUI project")
     assert gui.saveProject()
     assert gui.closeProject(isYes=True)
     assert not SHARED.hasProject
     screen("03-native-project-closed")
+    stage("reopen native GUI project")
     assert gui.openProject(SOURCE / "nwProject.nwx")
     pump()
     screen("04-native-project-reopened")
@@ -165,6 +201,7 @@ try:
 
     # Hash every original project file around the independent exporter.
     # Native session maintenance occurs only before this immutable phase.
+    stage("export closed project and check immutable source")
     before = hashes()
     output = E / "draft-shelf-export.zip"
     assert not output.exists()
@@ -176,6 +213,8 @@ try:
         "authoring": "Unmodified official NWProject and ProjectDocument APIs with real GuiMain",
         "consumer": "Real GuiMain native open/save/close/reopen handlers; official tree/document enumeration",
         "monkeypatches": False, "handwritten_native_xml": False, "ui_product_built": False}, indent=2) + "\n")
+    watchdog.stop()
+    stage("native gate complete")
 except Exception:
     traceback.print_exc()
     try:
