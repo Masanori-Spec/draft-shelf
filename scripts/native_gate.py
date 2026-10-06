@@ -108,9 +108,15 @@ def hashes():
 def enumerate_native(project):
     rows = []
     for item in project.tree:
+        persisted = item.pack()
         row = {"handle": item.itemHandle, "parent": item.itemParent, "root": item.itemRoot,
                "order": project.tree.subTreePos(item.itemHandle), "name": item.itemName, "type": item.itemType.name,
-               "class": item.itemClass.name, "layout": item.itemLayout.name, "active": item.isActive}
+               "class": item.itemClass.name,
+               # Folder layout/active defaults exist in memory but are not
+               # serialized. Use the official serializer for persisted meaning.
+               "layout": persisted["itemAttr"].get("layout", "NO_LAYOUT"),
+               "active": persisted["nameAttr"].get("active", "no") == "yes",
+               "runtimeLayout": item.itemLayout.name, "runtimeActive": item.isActive}
         if item.isFileType():
             doc = ProjectDocument(project, item.itemHandle)
             assert doc.fileExists(), item.itemHandle
@@ -163,6 +169,9 @@ try:
     add("child_doc", "Child", "parent_doc", "### Child scene\n\n> Literal marker, not converted HTML.\n")
     add("unicode_note", "人物", "notes", "# 人物\n\n@tag: 星野\n\n名前は星野。 π ≠ 3.14\n", note=True)
     add("blank", "Blank", "notes", "", note=True)
+    # The official loader creates this system root if absent. Author it through
+    # the native API so the first and reopened project contain the same nodes.
+    roles["trash"] = project.newRoot(nwItemClass.TRASH)
     project.session.startSession()
     assert project.saveProject()
     project.closeProject()
@@ -189,8 +198,8 @@ try:
     pump()
     screen("04-native-project-reopened")
     reopened = enumerate_native(SHARED.project)
-    assert reopened == first, "Official save/reopen changed tree or document body"
     (E / "native-reopened.json").write_text(json.dumps(reopened, ensure_ascii=False, indent=2) + "\n")
+    assert reopened == first, "Official save/reopen changed tree or document body"
     assert gui.saveProject()
     assert gui.closeProject(isYes=True)
     pump()

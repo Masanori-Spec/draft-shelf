@@ -20,6 +20,7 @@ EXPECTED = [
  ("notes",None,1,"資料","ROOT",None),
  ("unicode_note","notes",0,"人物","FILE","# 人物\n\n@tag: 星野\n\n名前は星野。 π ≠ 3.14\n"),
  ("blank","notes",1,"Blank","FILE",""),
+ ("trash",None,2,"Trash","ROOT",None),
 ]
 PATHS = {
  "two_headings":"0001-Novel/0001-Part α/0001-Nested/0001-Duplicate.md",
@@ -31,14 +32,15 @@ PATHS = {
 }
 DIRECTORIES = {
  "0001-Novel/", "0001-Novel/0001-Part α/", "0001-Novel/0001-Part α/0001-Nested/",
- "0001-Novel/0001-Part α/0002-Parent/", "0001-Novel/0002-Empty/", "0002-資料/",
+ "0001-Novel/0001-Part α/0002-Parent/", "0001-Novel/0002-Empty/", "0002-資料/", "0003-Trash/",
 }
 LITERAL_METADATA = []
 for role,parent,order,name,kind,body in EXPECTED:
     notes_root = role in ("notes", "unicode_note", "blank")
+    root_role = "trash" if role == "trash" else ("notes" if notes_root else "novel")
     LITERAL_METADATA.append({"handle":roles[role], "parent":roles[parent] if parent else None,
-        "root":roles["notes" if notes_root else "novel"], "order":order, "name":name, "type":kind,
-        "class":"CHARACTER" if notes_root else "NOVEL",
+        "root":roles[root_role], "order":order, "name":name, "type":kind,
+        "class":"TRASH" if role == "trash" else ("CHARACTER" if notes_root else "NOVEL"),
         "layout":("NOTE" if role in ("inactive_note","unicode_note","blank") else "DOCUMENT") if kind=="FILE" else "NO_LAYOUT",
         "active":kind=="FILE" and role!="inactive_note"})
 for filename in ("native-open.json", "native-reopened.json"):
@@ -106,7 +108,7 @@ for label, mutate in [
         raise AssertionError(f"Negative control unexpectedly passed: {label}")
 immutability = json.loads((E / "source-immutability.json").read_text())
 assert immutability["unchanged"] and immutability["before"] == immutability["after"]
-(E / "independent-oracle-result.json").write_text(json.dumps({"status":"pass", "documents":6, "items":11,
+(E / "independent-oracle-result.json").write_text(json.dumps({"status":"pass", "documents":6, "items":12,
     "exactPathsAndBodies":True, "nativeOpenSaveReopen":True, "sourceUnchanged":True,
     "negativeControls":negative, "exportSha256":hashlib.sha256((E/"draft-shelf-export.zip").read_bytes()).hexdigest()}, indent=2)+"\n")
 print("Independent literal native tree/body/output oracle passed, including three negatives")
