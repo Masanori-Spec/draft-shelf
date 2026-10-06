@@ -1,0 +1,11 @@
+{
+  "files": {
+    "index.html": "5869ba80624e8ef9b56a3f1208911c5271ac190d50b030e8ef76e326b1526bc1",
+    "web/core.js": "044db3d3970d0342a1844deef8f8a1e6730cd67a537fe2bfc7814e1bdfdbadbe",
+    "web/app.js": "a64ac878d99ca46304a4bf91c95981457fc5120b4c52359bfa97682fe988e4d3",
+    "web/sample.js": "73379c7aa83f16c7c0b693f3e03125a809189cac55ac26149ff39950cfe0b2bf",
+    "web/style.css": "e6e13fc98446c4b0f7e484fdd82744fb69760ec1560b77bcff480e3ef8ce6e18",
+    "README-OFFLINE.txt": "d094c136b709e522e8b2c43b49c449c70d1d1fa65ba153254c870dd2baa9eb08"
+  },
+  "zip_sha256": "d6bb56fa1e12792c0c6eee24b2d404fcd9ebed2abaa2aaba45d3244a24a1d9a7"
+}

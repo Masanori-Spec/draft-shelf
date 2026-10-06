@@ -55,7 +55,7 @@ def sha(data: bytes) -> str:
 def component(name: str, order: int) -> str:
     # Keep Unicode labels readable; remove path/control characters. Ordinals
     # distinguish duplicate/case-equivalent labels without using their headings.
-    clean = "".join("_" if c in '/\\:<>"|?*' or unicodedata.category(c).startswith("C") else c for c in name)
+    clean = "".join("_" if c in '/\\:<>"|?*' or unicodedata.category(c) in ("Cc", "Cf", "Cs") else c for c in name)
     clean = clean.strip(" .") or "Untitled"
     while len(clean.encode("utf-8")) > 96:
         clean = clean[:-1]
@@ -87,7 +87,7 @@ def split_document(raw: bytes, handle: str) -> tuple[dict, bytes]:
     # Native headers are flat string assignments. Reject compound TOML values
     # before invoking its recursive parser, rather than merely checking types
     # after a deeply nested array/table has already been parsed.
-    require(all(re.match(rb"[A-Za-z][A-Za-z0-9]*\s*=\s*['\"]", line) for line in lines[1:end]), "Native header must contain flat string fields")
+    require(all(re.match(rb"[A-Za-z][A-Za-z0-9]*[ \t]*=[ \t]*(?!\"\"\"|''')['\"]", line) for line in lines[1:end]), "Native header must contain flat single-line string fields")
     try:
         meta = tomllib.loads(header.decode("utf-8"))
     except (tomllib.TOMLDecodeError, UnicodeDecodeError, RecursionError) as exc:
@@ -147,7 +147,7 @@ def export_project(inputs: dict[str, bytes]) -> Export:
         name = label_node.text or ""
         require(not list(label_node) and len(name) <= 512, "Invalid item label")
         require(name == " ".join(name.split()), "Noncanonical native label whitespace")
-        require(not list(node.find("meta")), "Unsupported item metadata")
+        require(not list(node.find("meta")) and not (node.find("meta").text or "").strip(), "Unsupported item metadata")
         require(not (node.text or "").strip() and all(not (n.tail or "").strip() for n in node), "Unsupported item text")
         layout = attrs.get("layout", "NO_LAYOUT")
         require(layout in (("DOCUMENT", "NOTE") if kind == "FILE" else ("NO_LAYOUT",)), "Unsupported item layout")

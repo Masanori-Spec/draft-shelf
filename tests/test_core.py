@@ -96,6 +96,7 @@ class CoreTests(unittest.TestCase):
         f=fixture();f[f"content/{CHILD}.md"]=document(CHILD);self.reject(f)
     def test_legacy_format(self): self.reject(change(fixture(),lambda x:x.set("fileVersion","1.5")))
     def test_future_revision(self): self.reject(change(fixture(),lambda x:x.set("fileRevision","1")))
+    def test_metadata_text_rejected(self): self.reject(change(fixture(),lambda x:x.find('.//meta').__setattr__('text','unsupported payload')))
     def test_legacy_nwd(self):
         f=fixture();f[f"content/{DOC}.nwd"]=f.pop(f"content/{DOC}.md");self.reject(f)
     def test_xml_entity_utf16_pi_comment(self):
@@ -111,6 +112,9 @@ class CoreTests(unittest.TestCase):
     def test_toml_nesting_and_header_bytes_bounded(self):
         for raw in [b'+++\nname = '+b'['*1200+b'0'+b']'*1200+b'\n+++\n',b'+++\nname = "'+b'x'*16384+b'"\n+++\n']:
             f=fixture();f[f'content/{DOC}.md']=raw;self.reject(f)
+    def test_toml_control_whitespace_and_triple_string_rejections(self):
+        for old,new in [(b'"A"',b'"A\x7f"'),(b'name =',b'name\xc2\xa0='),(b'"A"',b'"A"\xc2\xa0'),(b'"A"',b'"""A"""')]:
+            f=fixture();f[f'content/{DOC}.md']=f[f'content/{DOC}.md'].replace(old,new);self.reject(f)
     def test_size_bounds(self):
         f=fixture();f[f'content/{DOC}.md']=b'x'*(MAX_DOCUMENT+1);self.reject(f)
         f=fixture();f['nwProject.nwx']=b'x'*(MAX_XML+1);self.reject(f)

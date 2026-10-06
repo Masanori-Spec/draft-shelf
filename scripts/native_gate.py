@@ -169,9 +169,12 @@ try:
     add("child_doc", "Child", "parent_doc", "### Child scene\n\n> Literal marker, not converted HTML.\n")
     add("unicode_note", "人物", "notes", "# 人物\n\n@tag: 星野\n\n名前は星野。 π ≠ 3.14\n", note=True)
     add("blank", "Blank", "notes", "", note=True)
+    roles["archive"] = project.newRoot(nwItemClass.ARCHIVE)
+    add("archived_doc", "Archived", "archive", "## Archived draft\n\nArchived text is included unless explicitly excluded.\n")
     # The official loader creates this system root if absent. Author it through
     # the native API so the first and reopened project contain the same nodes.
     roles["trash"] = project.newRoot(nwItemClass.TRASH)
+    add("trash_doc", "Discarded", "trash", "## Discarded draft\n\nTrash text is still source text.\n")
     project.session.startSession()
     assert project.saveProject()
     project.closeProject()
@@ -185,7 +188,7 @@ try:
     screen("01-native-project-open")
     first = enumerate_native(SHARED.project)
     (E / "native-open.json").write_text(json.dumps(first, ensure_ascii=False, indent=2) + "\n")
-    for role in ("two_headings", "inactive_note", "child_doc", "unicode_note"):
+    for role in ("two_headings", "inactive_note", "child_doc", "unicode_note", "archived_doc", "trash_doc"):
         assert gui.openDocument(roles[role])
         screen("02-native-document-" + role)
     stage("save and close native GUI project")
@@ -212,16 +215,19 @@ try:
     # Native session maintenance occurs only before this immutable phase.
     stage("export closed project and check immutable source")
     before = hashes()
-    output = E / "draft-shelf-export.zip"
-    assert not output.exists()
-    subprocess.run([sys.executable, "-m", "draft_shelf", str(SOURCE), str(output)], check=True)
+    assert not (E / "draft-shelf-export.zip").exists()
+    # Only actual packaged offline UI downloads produce the tested ZIPs.
+    subprocess.run(["node", "scripts/browser_test.mjs"], check=True)
+    subprocess.run(["node", "scripts/browser_convert.mjs"], check=True)
+    subprocess.run([sys.executable, "scripts/compare_browser_python.py"], check=True)
     after = hashes()
     assert before == after, "Exporter mutated the original project"
     (E / "source-immutability.json").write_text(json.dumps({"unchanged": True, "before": before, "after": after}, indent=2) + "\n")
     (E / "native-result.json").write_text(json.dumps({"status": "pass", "version": __version__,
         "authoring": "Unmodified official NWProject and ProjectDocument APIs with real GuiMain",
         "consumer": "Real GuiMain native open/save/close/reopen handlers; official tree/document enumeration",
-        "monkeypatches": False, "handwritten_native_xml": False, "ui_product_built": False}, indent=2) + "\n")
+        "monkeypatches": False, "handwritten_native_xml": False,
+        "producer": "Actual packaged offline browser UI downloads"}, indent=2) + "\n")
     watchdog.stop()
     stage("native gate complete")
 except Exception:

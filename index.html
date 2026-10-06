@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; font-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'none'">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>DraftShelf — Source documents, kept together</title>
+  <link rel="stylesheet" href="web/style.css">
+  <script defer src="web/core.js"></script>
+  <script defer src="web/sample.js"></script>
+  <script defer src="web/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skip">本文へ移動</a>
+  <header class="topbar">
+    <a class="brand" href="#main" aria-label="DraftShelf"><svg viewBox="0 0 36 36" aria-hidden="true"><rect x="2" y="4" width="7" height="25" rx="1"/><rect x="12" y="8" width="7" height="21" rx="1"/><path d="m23 5 7-1 4 24-7 1z"/><path class="shelf" d="M1 32h34"/></svg><span>DraftShelf</span></a>
+    <div class="header-right"><span class="local" data-i18n="local">ローカル処理・通信なし</span><div class="languages" role="group" aria-label="Language"><button id="lang-ja" aria-pressed="true">日本語</button><button id="lang-en" aria-pressed="false">EN</button></div></div>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="hero">
+      <div><p class="eyebrow">A SOURCE-PRESERVING COPY</p><h1 data-i18n="headline">原稿を、ひとつずつ。</h1><p class="intro" data-i18n="intro">novelWriter の構成と本文を、読みやすいフォルダーへ。見出しで分割せず、元の文書をそのまま残します。</p></div>
+      <div class="hero-note"><span>01 / 02 / 03</span><strong data-i18n="heroNote">構成を選ぶ。<br>本文を確かめる。<br>コピーを持ち出す。</strong></div>
+    </section>
+    <div class="scope"><strong>novelWriter 26.2.1 · format 1.6</strong><span data-i18n="scope">本文のコピー専用。標準 Markdown への変換や、元のプロジェクトへの書き戻しは行いません。</span></div>
+    <section class="intake card" aria-labelledby="source-heading">
+      <div><p class="step">01 <span data-i18n="sourceStep">SOURCE</span></p><h2 id="source-heading" data-i18n="sourceTitle">閉じたプロジェクトを選ぶ</h2><p data-i18n="sourceHelp">nwProject.nwx と content 内の .md を読み込みます。キャッシュや履歴はコピーしません。</p></div>
+      <div id="drop-zone" class="drop-zone">
+        <input id="file-input" type="file" webkitdirectory multiple class="visually-hidden" aria-label="Choose a closed novelWriter project folder">
+        <button id="choose" class="primary" data-i18n="choose">フォルダーを選ぶ</button>
+        <span data-i18n="orDrop">または、プロジェクト XML と文書ファイルをまとめてドロップ</span>
+        <div class="source-links"><button id="sample" class="text-button" data-i18n="sample">サンプルで試す</button><button id="clear" class="text-button" data-i18n="clear">クリア</button></div>
+      </div>
+    </section>
+    <div id="status" role="status" aria-live="polite" class="status" data-i18n="ready">ファイルはこのブラウザの中だけで処理されます。</div>
+    <div id="error" role="alert" class="error" hidden></div>
+    <section id="workbench" hidden aria-labelledby="review-heading">
+      <div class="review-heading"><div><p class="step">02 <span data-i18n="reviewStep">REVIEW</span></p><h2 id="review-heading" data-i18n="reviewTitle">元の文書と、出力先を確かめる</h2><p id="project-title" class="project-title"></p></div><div class="stats"><div><strong id="selected-count">0</strong><span data-i18n="selectedLabel">選択した本文</span></div><div><strong id="document-count">0</strong><span data-i18n="documentLabel">元の文書</span></div><div><strong id="directory-count">0</strong><span data-i18n="directoryLabel">出力フォルダー</span></div></div></div>
+      <div class="workspace">
+        <section class="tree-card card" aria-labelledby="tree-heading"><div class="panel-heading"><h3 id="tree-heading" data-i18n="treeTitle">プロジェクトの構成</h3><div><button id="select-all" class="text-button" data-i18n="selectAll">全選択</button><button id="select-none" class="text-button" data-i18n="selectNone">解除</button></div></div><p class="tree-help" data-i18n="treeHelp">本文のチェックを外すと、その本文だけを除外します。名前を選ぶとプレビューできます。</p><fieldset class="categories"><legend data-i18n="categoryTitle">含める本文を確認</legend><label><input type="checkbox" id="group-notes"><span data-i18n="notes">ノート</span><small id="count-notes"></small></label><label><input type="checkbox" id="group-inactive"><span data-i18n="inactive">非アクティブ</span><small id="count-inactive"></small></label><label><input type="checkbox" id="group-archive"><span>Archive</span><small id="count-archive"></small></label><label><input type="checkbox" id="group-trash"><span>Trash</span><small id="count-trash"></small></label></fieldset><div id="tree" class="tree" role="group" aria-label="Original project tree"></div></section>
+        <section class="body-card card" aria-labelledby="preview-heading"><div class="panel-heading"><div><span class="caption" data-i18n="previewCaption">SOURCE TEXT / NO RENDERING</span><h3 id="preview-heading"></h3></div><span id="preview-bytes" class="pill"></span></div><p id="preview-source" class="source-path"></p><pre id="body-preview" tabindex="0"></pre><p id="folder-preview" class="folder-preview" hidden></p><div class="preview-foot"><span data-i18n="previewFoot">本文は表示のために変換しません。書き出すバイト列も元のままです。</span></div></section>
+      </div>
+      <section class="mapping card" aria-labelledby="mapping-heading"><div class="panel-heading"><h3 id="mapping-heading" data-i18n="mappingTitle">すべての出力先</h3><span id="mapping-count" class="caption"></span></div><p data-i18n="mappingHelp">番号は元の並び順です。子を持つ文書は同名フォルダーの _document.md に入ります。出力名の調整は本文を変えません。</p><div class="table-scroll" tabindex="0" aria-label="Source and output mapping"><table><thead><tr><th data-i18n="thIncluded">本文</th><th data-i18n="thSource">元のラベル</th><th data-i18n="thPath">出力パス</th><th data-i18n="thBytes">バイト</th></tr></thead><tbody id="mapping-rows"></tbody></table></div></section>
+      <section class="export-card card" aria-labelledby="export-heading"><div><p class="step">03 <span data-i18n="exportStep">COPY</span></p><h2 id="export-heading" data-i18n="exportTitle">確認したコピーを書き出す</h2><p class="important" data-i18n="retainedWarning">除外した本文は ZIP に入りません。構成・元の名前・メタデータは、確認用 manifest に残ります。</p><p data-i18n="copyLimit">これは本文と構成のコピーです。設定・履歴を含む完全なバックアップとしては、元のプロジェクトを保管してください。</p></div><div class="export-actions"><label class="acknowledgment"><input id="ack" type="checkbox"><span data-i18n="ack">選択した本文、除外した本文、出力名とレポートに残る情報を確認しました。</span></label><div class="buttons"><button id="download" class="primary" disabled data-i18n="download">コピー ZIP を書き出す</button><button id="report" class="secondary" data-i18n="report">JSON レポート</button><button id="print" class="text-button" data-i18n="print">確認表を印刷</button></div></div></section>
+    </section>
+    <section class="limits"><h2 data-i18n="limitsTitle">範囲を小さく、コピーを確かに。</h2><p data-i18n="limitsText">XML 2 MiB・文書ごと 4 MiB・合計 32 MiB・最大 2048 項目。古い .nwd 形式、欠けた本文、重複した識別子、不正な親子関係は読み込めません。ZIP の本文は novelWriter の記法をそのまま残します。</p></section>
+  </main>
+  <footer><span>DraftShelf · <span data-i18n="footer">原稿を勝手に組み替えない、小さなコピー道具。</span></span><a href="https://github.com/Masanori-Spec/draft-shelf" target="_blank" rel="noopener noreferrer" data-i18n="sourceLink">ソースと検証記録</a></footer>
+</body>
+</html>

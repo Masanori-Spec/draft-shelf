@@ -8,9 +8,9 @@ The saved fixture is then opened by the actual `GuiMain.openProject` handler, di
 
 Unchanged official `NWProject`/`ProjectDocument` enumerate the real open and reopened files. Actual sibling positions come from the native tree. Persisted layout/active meaning comes from native `ProjectItem.pack()`; folder runtime defaults are not serialized, and their raw values are recorded separately. A separate oracle imports neither DraftShelf nor the fixture author and compares these records with literal expected labels, parent roles, order, document types and complete bodies.
 
-## Handwritten fixture
+## Original prototype fixture
 
-The source has twelve items and six original documents, in two content roots plus the native empty Trash root:
+The original Python prototype source has twelve items and six original documents, in two content roots plus the native empty Trash root:
 
 ```text
 Novel
@@ -30,6 +30,8 @@ Trash                 native system root, empty
 The two content roots are API-created in the opposite order, then inserted at the intended native position. Trash is authored explicitly through the official API, because the native loader creates it if absent; it is included in output rather than dropped. This checks that output follows native tree order rather than creation order or alphabetical sorting. Duplicate labels must remain distinct. The two headings in the first document must remain in one body file; no extraction by heading is permitted.
 
 Expected path examples are literal oracle data, including `0001-Novel/0001-Part α/0002-Parent/_document.md` and `0001-Novel/0001-Part α/0002-Parent/0001-Child.md`. The oracle also verifies every empty/root/folder directory and every body byte. All six source document handles must occur exactly once in the export manifest.
+
+The current browser gate adds an Archive root with one body and a body under Trash: 15 items, eight bodies and eight output directories. Its all-body and explicitly filtered real browser downloads are checked separately. See [the browser acceptance contract](BROWSER-ACCEPTANCE.md).
 
 ## Immutability and rejection
 

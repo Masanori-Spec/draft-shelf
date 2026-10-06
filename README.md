@@ -1,6 +1,6 @@
 # DraftShelf: native-first source-tree export
 
-**Native feasibility passed for novelWriter 26.2.1 / project format 1.6 revision 0. This is a Python source prototype; no product UI has been built.**
+**Offline browser UI candidate for novelWriter 26.2.1 / project format 1.6 revision 0. The separate Python native feasibility gate passed. Actual browser/native acceptance is still pending.**
 
 [Verified native run](https://github.com/Masanori-Spec/draft-shelf/actions/runs/37456245967) · [Evidence and limits](docs/VERIFICATION.md)
 
@@ -8,7 +8,15 @@ DraftShelf reads a closed, unpacked novelWriter **project format 1.6 revision 0*
 
 This is a small source-preservation utility. novelWriter already builds manuscripts, and Kindling already imports/exports novelWriter projects. The narrower aim here is to keep the source document boundaries and project tree in a readable folder copy. [novelWriter issue #1108](https://github.com/saga-soft/novelWriter/issues/1108) asks for this kind of export and is planned upstream, so this should not be presented as a novel category or a replacement writing application. See [the source comparison](docs/SOURCES.md).
 
-## Prototype use
+## Offline app
+
+Extract [draft-shelf-offline.zip](draft-shelf-offline.zip) and open `index.html` in desktop Chrome/Chromium. Choose a saved, closed project folder. The Japanese/English interface previews the original tree, literal source text and every output path, then requires explicit review before downloading a copy. No server, account or background network access is used.
+
+All bodies are included initially, including notes, inactive documents, Archive and Trash. Per-document/category controls make exclusions explicit. Excluded **body text** is omitted; the full source tree, labels and header metadata remain in the traceability manifest. Empty folders and original ordinal paths remain even when bodies are excluded. Selection changes and newer input clear acknowledgment; Clear cancels pending reads.
+
+Only files the user explicitly supplies are read. The app does not walk filesystem handles, open external paths or evaluate source markup. A present native lock file is rejected. Print review covers the complete selection/path table, not the full manuscript. See [browser acceptance](docs/BROWSER-ACCEPTANCE.md).
+
+## Python prototype use
 
 Python 3.11+ on Linux; no dependencies are needed for the exporter itself:
 
@@ -36,10 +44,14 @@ The hosted workflow verifies the official novelWriter 26.2.1 wheel and the nativ
 
 An independent handwritten oracle checks the complete tree and all six bodies against exact output paths. The exporter runs only after the native GUI closes the project; every original project file is hashed before and after export. Missing-document, heading-split and body-rewrite negative controls must fail the same exact-output assertions. See [the complete acceptance contract](docs/TEST-DESIGN.md).
 
-The complete native gate passed at `a8b3584760daf9d87263a9ccc6e57a073b67a4d4`, with the downloaded evidence independently checked. A future browser producer must pass again using its own actual downloaded files; this Python result is not a substitute for that test.
+The complete native gate passed at `a8b3584760daf9d87263a9ccc6e57a073b67a4d4`, with the downloaded evidence independently checked. The browser producer must pass again using its own actual downloaded files; this Python result is not a substitute for that test.
 
 ## Input limits and distribution
 
 Limits: 2 MiB XML, 4 MiB per document, 32 MiB combined input, 2048 tree items, 16 KiB flat native headers, 32 hierarchy levels and 900-byte generated path stems. The reader rejects DTDs, comments, processing instructions, non-UTF-8 files, unsupported document headers, duplicate handles, invalid parents, cycles and conflicting native order representations. CLI source files must be regular files; content symlinks are rejected.
 
 Source only. No novelWriter/Qt binaries, vendor implementation, real writing projects or original-code license grant is distributed. The official application and dependencies are fetched from official package registries only within hosted CI. No fees, hosting service or account is needed to use the exporter.
+
+## Browser candidate checks
+
+The JavaScript reader is an independent implementation. Current local tests include 30 direct comparisons with the Python reader for labels, exact source bodies and metadata, plus malformed/bounded input cases. The hosted gate must open the exact packaged offline ZIP, obtain real browser downloads (all eight native fixture bodies and a five-body explicit selection), and compare those files with fresh official native enumeration and a separate literal oracle. Browser runtime and screenshot/print acceptance remain pending. The preserved Python proof in VERIFICATION.md is unchanged.
