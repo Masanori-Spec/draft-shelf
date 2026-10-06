@@ -1,0 +1,41 @@
+name: Native source-tree feasibility
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-native-project:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Standard source checks
+        run: python3 -m unittest discover -s tests -v
+      - name: Install official native test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-venv xvfb xauth libenchant-2-2 libxcb-cursor0 libegl1 libopengl0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-randr0 libxcb-xinerama0 libxcb-render-util0 fonts-noto-cjk
+          mkdir -p .native evidence
+          python3 -m venv .native/venv
+          .native/venv/bin/python -m pip download --index-url https://pypi.org/simple --only-binary=:all: --no-deps --dest .native novelWriter==26.2.1
+          echo '81e65e8e602b798250d4236a6c139ab22b2d2deaca041db110e82b829a15066d  .native/novelwriter-26.2.1-py3-none-any.whl' | sha256sum --check | tee evidence/release-integrity.txt
+          .native/venv/bin/python -m pip install --index-url https://pypi.org/simple --only-binary=:all: .native/novelwriter-26.2.1-py3-none-any.whl
+          .native/venv/bin/python -m pip freeze > evidence/native-dependencies.txt
+      - name: Official GUI and project classes create save reopen and enumerate
+        env:
+          QT_QPA_PLATFORM: xcb
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
+        run: |
+          set -euo pipefail
+          xvfb-run -a -s '-screen 0 1440x1100x24' .native/venv/bin/python scripts/native_gate.py 2>&1 | tee evidence/native.log
+          python3 scripts/oracle.py
+      - name: Retain native evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: draft-shelf-native-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 14
